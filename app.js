@@ -22,11 +22,8 @@ const authenticateUser = require('./middleware/authentication');
 // routers
 const authRouter = require('./routes/auth');
 const menuitemRouter = require('./routes/menuitems');
-const milkRouter = require('./routes/milks');
+const ingredientRouter = require('./routes/ingredients');
 const sizeRouter = require('./routes/sizes');
-const sugarRouter = require('./routes/sugars');
-const temperatureRouter = require('./routes/temperatures');
-const categoryRouter = require('./routes/categories');
 const cartRouter = require('./routes/carts');
 const ordersRouter = require('./routes/orders');
 
@@ -62,18 +59,15 @@ app.use(xss());
 
 // routes
 app.get('/', (req, res) => {
-  res.send('<h1>Tea API</h1><a href="/api-docs">Documentation</a>');
+  res.send('<h1>Pizza API</h1><a href="/api-docs">Documentation</a>');
 });
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/menuitems', menuitemRouter)
-app.use('/api/v1/milks', milkRouter)
 app.use('/api/v1/sizes', sizeRouter)
-app.use('/api/v1/sugars', sugarRouter)
-app.use('/api/v1/temperatures', temperatureRouter)
-app.use('/api/v1/categories', categoryRouter)
+app.use('/api/v1/ingredient', ingredientRouter)
 app.use('/api/v1/carts', authenticateUser, cartRouter)
 app.use('/api/v1/orders', authenticateUser, ordersRouter)
 

@@ -8,9 +8,9 @@ const IngredientSchema = new mongoose.Schema(
       trim: true,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Category is required'],
+      type: String,
+      enum: ['VEGETABLES', 'MEATS', 'OTHERS'],
+      default: 'OTHERS'
     },
     price: {
       type: Number,
@@ -23,4 +23,4 @@ const IngredientSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Category', CategorySchema);
+module.exports = mongoose.model('Ingredient', IngreditenSchema);
