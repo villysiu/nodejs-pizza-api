@@ -14,12 +14,6 @@ const CartSchema = new mongoose.Schema(
       required: [true, 'Menuitem required'],
     },
 
-    milkId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Milk',
-      required: [true, 'Milk required'],
-    },
-
     sizeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Size',
@@ -27,17 +21,13 @@ const CartSchema = new mongoose.Schema(
 
     },
 
-    temperature: {
-      type: String,
-      enum: ['NA', 'HOT', 'ICED'], 
-      required: [true, 'Temperature required'],
-    },
-
-    sugar: {
-      type: String,
-      enum: ['NA', '0%', '25%', '50%','75%', '100%'], 
-      required: [true, 'Sugar required'],
-    },
+    ingredients: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ingredient",
+        required: true
+      }
+    ]
 
     quantity: {
       type: Number,
