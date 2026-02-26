@@ -15,10 +15,11 @@ const auth = async (req, res, next) => {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET)
 
-console.log('in auth', payload)
+  console.log('in auth', payload)
 // attach the user to the header
     req.user = await User.findById(payload.userId)
     
+    console.log('loading req.user', req.user)
     
     next()
 

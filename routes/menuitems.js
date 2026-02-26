@@ -12,7 +12,7 @@ const authenticateUser = require('../middleware/authentication');
 const {isAdmin} = require('../middleware/authorization')
 
 const Menuitem = require('../models/Menuitem')
-const getResourceById = require('../middleware/validateRequest')
+const {getResourceById} = require('../middleware/validateRequest')
 
 
 //public 

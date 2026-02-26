@@ -3,6 +3,7 @@ const Cart = require('../models/Cart')
 const isAdmin = async (req, res, next) => {
     console.log("check user is admin")
     console.log(req.user)
+    
 
     if(!req.user)
         return res.status(401).json({message: "Unauthorized"})
@@ -31,7 +32,6 @@ const isOwner = (Model) => {
         if (!item) 
             throw new NotFoundError(`No item with id ${itemId} owned by user`)
         
-    
         req.resource = item
         next();
     }

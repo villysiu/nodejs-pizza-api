@@ -12,7 +12,7 @@ const {
 const Size = require('../models/Size')
 const authenticateUser = require('../middleware/authentication');
 const {isAdmin} = require('../middleware/authorization')
-const getResourceById = require('../middleware/validateRequest')
+const {getResourceById} = require('../middleware/validateRequest')
 
 //public 
 router.get("/", getSizes);
