@@ -4,7 +4,7 @@ const { BadRequestError, NotFoundError } = require('../errors')
 
 const getSizes = async (req, res) => {
   const sizes = await Size.find();
-  res.status(StatusCodes.OK).json({ sizes, count: sizes.length })
+  res.status(StatusCodes.OK).json({ sizes })
 }
 
 

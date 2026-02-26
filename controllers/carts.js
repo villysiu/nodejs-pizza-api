@@ -1,6 +1,5 @@
 const Cart = require('../models/Cart')
 const Menuitem = require('../models/Menuitem')
-const Milk = require('../models/Milk')
 const Size = require('../models/Size')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, NotFoundError } = require('../errors')
@@ -9,11 +8,7 @@ const getCarts = async (req, res) => {
     const carts = await Cart.find({ createdBy: req.user._id })
     // .populate({
     //     path: 'menuitemId',
-    //     select: 'title price _id'
-    // })
-    // .populate({
-    //   path: 'milkId',
-    //   select: 'title price _id'
+    //     select: 'title  _id'
     // })
     // .populate({
     //   path: 'sizeId',
@@ -25,7 +20,7 @@ const getCarts = async (req, res) => {
         acc + cart.unitPrice * cart.quantity
     ), 0)
 
-    res.status(StatusCodes.OK).json({ carts, count: carts.length, subtotal })
+    res.status(StatusCodes.OK).json({ carts, subtotal })
 }
 // no use
 const getCart = async (req, res) => {
@@ -39,49 +34,48 @@ const createCart = async (req, res) => {
     console.log(req.body)
 //     {
 //   menuitemId: '69814634fd04af387993d3fa',
-//   milkId: '69814385fd04af387993d3e6',
 //   sizeId: '698142fbfd04af387993d3e4',
-//   sugar: 'NA',
-//   temperature: 'NA',
+//   ingredientsId: ['432325','35252', '2534']
 //   quantity: 1
 // }
     const {
         menuitemId,
-        milkId,
         sizeId,
-        temperature,
-        sugar,
+        ingredientsId,
         quantity
     } = req.body
 
     let unitPrice = 0
 
-    let menuitem = await Menuitem.findById(menuitemId)
+    if(!menuitemId || !sizeId )
+        throw new BadRequestError('menuitemId and sizeId required.')
+
+    const menuitem = await Menuitem.findById(menuitemId)
     if(!menuitem)
         throw new NotFoundError('Menuitem not found')
-    unitPrice += menuitem.price
 
-
-    let milk = await Milk.findById(milkId)
-    if(!milk)
-        throw new NotFoundError('Milk not found')
-    unitPrice += milk.price     
-
-    let size = await Size.findById(sizeId)
+    const size = await Size.findById(sizeId)
     if(!size)
         throw new NotFoundError('Size not found')
     unitPrice += size.price
-console.log('in create cart', req.user)
+
+
+    if(ingredientIds.length > 0) {
+        ingredientIds.map(async (id) => {
+            const ingredient = await Ingredient.findById(id);
+            if(!ingredient)
+                throw new NotFoundError('Ingredient not found');
+            unitPrice += ingredient.price;
+        })
+    }
+
 
     const cart = await Cart.create({
         createdBy: req.user._id,
         menuitemId: menuitem._id,
-
-        milkId: milk._id,
         sizeId: size._id,
-        temperature,
-        sugar,
-        quantity,
+        ingredientIds,
+        quantity: (quantity <= 0 || typeof quantity !== 'number') ? 1 : quantity,
         unitPrice
         
     })
@@ -91,51 +85,46 @@ console.log('in create cart', req.user)
 const updateCart = async (req, res) => {
     console.log("update cart")
     console.log(req.body)
-//     {
-//   cartId: '69992f2140affd8172d3bcb3',
-//   milkId: '69813e1ab60cff3582533eda',
+    //   cartId: '69992f2140affd8172d3bcb3',  from params
+//     body
+//  {
+// ingredientsId: ['54546...', '5454...']
 //   sizeId: '698142fbfd04af387993d3e4',
-//   sugar: '0%',
-//   temperature: 'HOT',
 //   quantity: 2
 // }
-    // all item required
+    const cart = req.resource;
     const {
-        // menuitemId,
-        milkId,
-        temperature,
-        sugar,
         sizeId,
+        ingredientsId,
         quantity
     } = req.body
-
-    const cart = req.resource;
 
 
     const menuitem = await Menuitem.findById(cart.menuitemId)
     if(!menuitem)
         throw new NotFoundError('Menuitem not found')
 
-    let unitPrice = menuitem.price
+    let unitPrice = 0
 
-    const milk = await Milk.findById(milkId || cart.milkId)
-    // console.log(milk)
-    if(!milk)
-        throw new NotFoundError('Milk not found')
-    unitPrice += milk.price     
+    if(sizeId !== undefined){
+        const size = await Size.findById(sizeId)
+        if(!size)
+            throw new NotFoundError('Size not found')
+        cart.sizeId = size._id
+        unitPrice += size.price
+    }
 
-    const size = await Size.findById(sizeId|| cart.sizeId)
-    if(!size)
-        throw new NotFoundError('Size not found')
-    unitPrice += size.price
-    
+    if(ingredientIds !== undefined && ingredientIds.length > 0){
 
-    cart.milkId = milk._id
-    cart.sizeId = size._id
-    cart.temperature = temperature ?? cart.temperature;
-    cart.sugar = sugar ?? cart.sugar;
-    // cart.sugar = sugar || cart.sugar
-    cart.quantity = quantity
+        const temp = ingredientIds.map(async (id) => {
+            const ingredient = await Ingredient.findById(id);
+            if(!ingredient)
+                throw new NotFoundError('Ingredient not found');
+            unitPrice += ingredient.price;
+        })
+        cart.ingredientIds = temp
+    }
+    cart.quantity = (typeof quantity !== 'number' || quantity < 0) ? 1 : quantity
     cart.unitPrice = unitPrice
         
     await cart.save()
