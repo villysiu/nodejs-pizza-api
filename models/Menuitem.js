@@ -16,16 +16,19 @@ const MenuitemSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       trim: true,
+      default: ''
     },
       // default ingredients
-    ingredients: [
-      {
+    ingredientIds: {
+      type: [
+        {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Ingredient",
         required: true
       }
-    ]
-    
+      ],
+      default: []
+    }
 
   },
   {

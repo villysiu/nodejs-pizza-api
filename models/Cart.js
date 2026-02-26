@@ -27,7 +27,7 @@ const CartSchema = new mongoose.Schema(
         ref: "Ingredient",
         required: true
       }
-    ]
+    ],
 
     quantity: {
       type: Number,
