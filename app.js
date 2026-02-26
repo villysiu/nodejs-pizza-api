@@ -67,7 +67,7 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/menuitems', menuitemRouter)
 app.use('/api/v1/sizes', sizeRouter)
-app.use('/api/v1/ingredient', ingredientRouter)
+app.use('/api/v1/ingredients', ingredientRouter)
 app.use('/api/v1/carts', authenticateUser, cartRouter)
 app.use('/api/v1/orders', authenticateUser, ordersRouter)
 

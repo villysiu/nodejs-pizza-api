@@ -6,6 +6,7 @@ const IngredientSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Title is required'],
       trim: true,
+      unique: true
     },
     category: {
       type: String,
@@ -15,6 +16,7 @@ const IngredientSchema = new mongoose.Schema(
     price: {
       type: Number,
       default: 0.0,
+      min: [0, 'Price cannot be negative']
     },
 
   },
@@ -23,4 +25,4 @@ const IngredientSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Ingredient', IngreditenSchema);
+module.exports = mongoose.model('Ingredient', IngredientSchema);
