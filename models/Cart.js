@@ -23,9 +23,16 @@ const CartSchema = new mongoose.Schema(
 
     ingredients: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Ingredient",
-        required: true
+        ingredientId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Ingredient",
+          required: true
+        },
+        qty: {
+          type: Number,
+          default: 1,
+          min: 1
+        }
       }
     ],
 

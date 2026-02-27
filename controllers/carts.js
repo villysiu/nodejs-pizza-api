@@ -14,6 +14,10 @@ const getCarts = async (req, res) => {
     //   path: 'sizeId',
     //   select: 'title price _id'
     // })
+    // .populate({
+    //   path: 'ingredients.ingredientId'',
+    //   select: 'title price _id qty'
+    // })
     .sort('-updatedAt')
 
     const subtotal = carts.reduce((acc, cart) => (
@@ -35,13 +39,13 @@ const createCart = async (req, res) => {
 //     {
 //   menuitemId: '69814634fd04af387993d3fa',
 //   sizeId: '698142fbfd04af387993d3e4',
-//   ingredientsId: ['432325','35252', '2534']
+//   ingredientIds: [{ingredientId: '432325', qty: 1} ,'{ingredientId: '33545', qty: 1} ,{ingredientId: '348398239', qty: 1} ]
 //   quantity: 1
 // }
     const {
         menuitemId,
         sizeId,
-        ingredientsId,
+        ingredients,
         quantity
     } = req.body
 
@@ -57,25 +61,30 @@ const createCart = async (req, res) => {
     const size = await Size.findById(sizeId)
     if(!size)
         throw new NotFoundError('Size not found')
+
+    if (quantity!==undefined && (isNaN(quantity) || quantity <= 0)) {
+        throw new BadRequestError('Quantity must be a valid number bigger than 0');
+    }
+
     unitPrice += size.price
 
-
     if(ingredientIds.length > 0) {
-        ingredientIds.map(async (id) => {
-            const ingredient = await Ingredient.findById(id);
+
+        ingredientIds.map(async (data) => {
+            const {ingredientId, qty} = data
+            const ingredient = await Ingredient.findById(ingredientId);
             if(!ingredient)
                 throw new NotFoundError('Ingredient not found');
-            unitPrice += ingredient.price;
+            unitPrice += qty * size.perTopping;
         })
     }
 
-
     const cart = await Cart.create({
         createdBy: req.user._id,
-        menuitemId: menuitem._id,
-        sizeId: size._id,
+        menuitemId,
+        sizeId,
         ingredientIds,
-        quantity: (quantity <= 0 || typeof quantity !== 'number') ? 1 : quantity,
+        quantity,
         unitPrice
         
     })
@@ -86,45 +95,42 @@ const updateCart = async (req, res) => {
     console.log("update cart")
     console.log(req.body)
     //   cartId: '69992f2140affd8172d3bcb3',  from params
-//     body
-//  {
-// ingredientsId: ['54546...', '5454...']
-//   sizeId: '698142fbfd04af387993d3e4',
-//   quantity: 2
-// }
+    //  {
+    //   ingredientIds: [{ingredientId: '432325', qty: 1} ,'{ingredientId: '33545', qty: 1} ,{ingredientId: '348398239', qty: 1} ]
+    //   sizeId: '698142fbfd04af387993d3e4',
+    //   quantity: 2
+    // }
     const cart = req.resource;
     const {
         sizeId,
-        ingredientsId,
+        ingredientIds,
         quantity
     } = req.body
 
+    const size  = await Size.findById(sizeId !== undefined ? sizeId : cart.sizeId)
+    if(!size)
+        throw new NotFoundError('Size not found')
+    cart.sizeId = size._id
 
-    const menuitem = await Menuitem.findById(cart.menuitemId)
-    if(!menuitem)
-        throw new NotFoundError('Menuitem not found')
+    let unitPrice = size.price
+    
+    const tempIngredientIds  = ingredientIds !== undefined ? ingredientIds : cart.ingredientIds
+    for(const {ingredientId, qty} of tempIngredientIds ){
+        const ingredient = await Ingredient.findById(ingredientId);
+        if(!ingredient)
+            throw new NotFoundError('Ingredient not found');
 
-    let unitPrice = 0
+        unitPrice += qty * size.perTopping;
+    }
+    cart.ingredientIds = tempIngredientIds;
 
-    if(sizeId !== undefined){
-        const size = await Size.findById(sizeId)
-        if(!size)
-            throw new NotFoundError('Size not found')
-        cart.sizeId = size._id
-        unitPrice += size.price
+    if (quantity!==undefined)
+        if(isNaN(quantity) || quantity <= 0){
+            throw new BadRequestError('Quantity must be a valid number bigger than 0');
+        cart.quantity =  quantity
     }
 
-    if(ingredientIds !== undefined && ingredientIds.length > 0){
-
-        const temp = ingredientIds.map(async (id) => {
-            const ingredient = await Ingredient.findById(id);
-            if(!ingredient)
-                throw new NotFoundError('Ingredient not found');
-            unitPrice += ingredient.price;
-        })
-        cart.ingredientIds = temp
-    }
-    cart.quantity = (typeof quantity !== 'number' || quantity < 0) ? 1 : quantity
+    
     cart.unitPrice = unitPrice
         
     await cart.save()

@@ -81,10 +81,10 @@ const updateMenuitem = async (req, res) => {
 const getMenuitems = async (req, res) => {
   
   const menuitems = await Menuitem.find()
-   .populate({
-        path: 'ingredientIds',
-        select: 'title  _id'
-    })
+  //  .populate({
+  //       path: 'ingredientIds',
+  //       select: '_id title  price'
+  //   })
 
   res.status(StatusCodes.OK).json({menuitems, 'count': menuitems.length});
 };
