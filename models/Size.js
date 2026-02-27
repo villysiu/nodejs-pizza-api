@@ -10,7 +10,13 @@ const SizeSchema = new mongoose.Schema(
     price: {
       type: Number,
       default: 0.0,
+      min: 0
     },
+    perTopping: {
+      type: Number,
+      default: 0.0,
+      min: 0
+    }
   },
   {
     timestamps: true,

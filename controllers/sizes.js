@@ -13,19 +13,24 @@ const getSize = async (req, res) => {
 }
 
 const createSize = async (req, res) => {
-  const { title, price } = req.body
+  const { title, price, perTopping } = req.body
 
   if (!title || title.trim() === '') {
     throw new BadRequestError('Title is required')
   }
 
-  if (price === undefined || isNaN(price)) {
+  if (price !== undefined && isNaN(price)) {
     throw new BadRequestError('Price must be a valid number')
   }
+  if (perTopping !== undefined && isNaN(perTopping)) {
+    throw new BadRequestError('perTopping must be a valid number')
+  }
+
 
   const size = await Size.create({
     title: title.trim(),
-    price: Number(price)
+    price,
+    perTopping
   })
 
   res.status(StatusCodes.CREATED).json({ size })
@@ -34,7 +39,7 @@ const createSize = async (req, res) => {
 
 const updateSize = async (req, res) => {
   const size = req.resource
-  const { title, price } = req.body;
+  const { title, price, perTopping } = req.body;
 
   if(title !== undefined){
     if (title.trim() === '') {
@@ -47,6 +52,12 @@ const updateSize = async (req, res) => {
       throw new BadRequestError('Price must be a number')
 
     size.price = Number(price)
+  }
+  if (perTopping !== undefined) {
+    if (isNaN(perTopping)) 
+      throw new BadRequestError('PerTopping must be a number')
+
+    size.perTopping = Number(perTopping)
   }
   await size.save()
   
