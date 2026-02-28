@@ -30,9 +30,6 @@ const isOwner = (Model) => {
         })
 
         if (!item) {
-            // const error = new Error(`No item with id ${itemId} owned by user`);
-            // error.statusCode = 404;
-            // throw error;
             throw new NotFoundError(`No item with id ${itemId} owned by user`)
         }
         req.resource = item
