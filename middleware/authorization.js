@@ -1,9 +1,9 @@
 const Cart = require('../models/Cart')
-
+const { NotFoundError } = require('../errors'); 
 const isAdmin = async (req, res, next) => {
     console.log("check user is admin")
     console.log(req.user)
-    
+
 
     if(!req.user)
         return res.status(401).json({message: "Unauthorized"})
@@ -29,10 +29,14 @@ const isOwner = (Model) => {
             createdBy: userId,
         })
 
-        if (!item) 
+        if (!item) {
+            // const error = new Error(`No item with id ${itemId} owned by user`);
+            // error.statusCode = 404;
+            // throw error;
             throw new NotFoundError(`No item with id ${itemId} owned by user`)
-        
+        }
         req.resource = item
+  
         next();
     }
 }
