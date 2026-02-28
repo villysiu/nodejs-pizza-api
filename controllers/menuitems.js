@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Menuitem = require('../models/Menuitem')
 const Ingredient = require('../models/Ingredient')
 const { BadRequestError, NotFoundError } = require('../errors')
-const { checkExistsById } = require('../middleware/validateRequest')
+
 
 const createMenuitem = async (req, res) => {
   
@@ -17,11 +17,13 @@ const createMenuitem = async (req, res) => {
   if(!title  || title.trim() === '') 
     throw new BadRequestError('Title cannot be empty')
 
-  await Promise.all(
-    ingredientIds.map(async (id) => {
-      await checkExistsById(Ingredient, id);  
-    })
-  );
+  for(const ingredientId of ingredientIds){
+      const exists = await Ingredient.exists({ _id: id });
+      if (!exists) 
+          throw new NotFoundError(`No ingredient with id ${id}`);
+  }
+
+
   if(!active || typeof active !== 'boolean')
     throw new BadRequestError('Active required and must be boolean')
 
@@ -54,13 +56,14 @@ const updateMenuitem = async (req, res) => {
   }
   
   if(ingredientIds !== undefined && ingredientIds.length > 0) {
-    const tempArr = await Promise.all(
-      ingredientIds.map(async (id) => {
-        await checkExistsById(Ingredient, id);
-        return id;
-      })
-    )
-    menuitem.ingredientIds = tempArr;
+
+    for(const ingredientId of ingredientIds){
+      const exists = await Ingredient.exists({ _id: id });
+        if (!exists) 
+            throw new NotFoundError(`No ingredient with id ${id}`);
+    }
+  
+    menuitem.ingredientIds = ingredientIds;
   }
   
   if(imageUrl !== undefined) 

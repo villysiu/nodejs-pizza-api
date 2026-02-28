@@ -17,12 +17,5 @@ const getResourceById = (Model) => {
     }
 }
 
-const checkExistsById = async(Model, itemId) => {
-    
-    const exists = await Model.exists({ _id: itemId });
-    if (!exists) 
-        throw new NotFoundError(`No ${Model.modelName} with id ${itemId}`);
-    return true;
-    
-}
-module.exports = {getResourceById, checkExistsById}
+
+module.exports = {getResourceById}
