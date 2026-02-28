@@ -1,3 +1,5 @@
+const { NotFoundError } = require('../errors'); 
+
 const getResourceById = (Model) => {
     return async (req, res, next) => {
         console.log('check if itemId existed')
