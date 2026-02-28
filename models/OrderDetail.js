@@ -21,11 +21,18 @@ const OrderDetailsSchema = new mongoose.Schema(
 
     },
 
-    ingredients: [
+    ingredientDetails: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Ingredient",
-        required: true
+        ingredientId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Ingredient",
+          required: true
+        },
+        qty: {
+          type: Number,
+          default: 1,
+          min: 0, max: 2
+        }
       }
     ],
 

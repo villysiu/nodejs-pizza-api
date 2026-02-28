@@ -1,6 +1,6 @@
 const Order = require('../models/Order')
 const Cart = require('../models/Cart')
-const OrderDetails = require('../models/OrderDetails')
+const OrderDetail = require('../models/OrderDetail')
 
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, NotFoundError } = require('../errors')
@@ -10,24 +10,21 @@ const getOrders = async (req, res) => {
   const orders = await Order.find({ createdBy: req.user._id })
     .sort('-createdAt')
 
-
-  res.status(StatusCodes.OK).json({ orders, count: orders.length })
+  res.status(StatusCodes.OK).json({ orders })
 }
 
 const getOrder = async (req, res) => {
   
   const order = req.resource
-  const orderDetailsData = await OrderDetails.find({ 'orderId': order._id})
+  const orderDetails = await OrderDetail.find({ 'orderId': order._id})
     // .select('-_id')
     // .populate('menuitem', 'title -_id')
-    // .populate('milk', 'title -_id')
     // .populate('size', 'title -_id')
 
 
   res.status(StatusCodes.OK).json({ 
     ...order.toObject(), 
-    orderDetails:
-      orderDetailsData,
+    orderDetails
     
   })
 }
@@ -35,6 +32,7 @@ const getOrder = async (req, res) => {
 const createOrder = async (req, res) => {
 
   const carts = await Cart.find({'createdBy': req.user._id})
+  .select('menuitemId sizeId ingredientDetails quantity unitPrice -_id')
 
   console.log(carts)
   if(carts.length === 0)  
@@ -50,21 +48,20 @@ const createOrder = async (req, res) => {
     total
   })
 
-  // create orderDetails data so if crashed, it wont mess up the database withpartial data
+  // create orderDetails data so if crashed, it wont mess up the database with partial data
   const orderDetailsData = carts.map(cart => (
     {
       orderId: order._id,
-      menuitemId: cart.menuitemId,
-      milkId: cart.milkId,
-      sizeId: cart.sizeId,
-      temperature: cart.temperature,
-      sugar: cart.sugar,
-      quantity: cart.quantity,
-      unitPrice: cart.unitPrice
+      ...cart.toObject()
+      // menuitemId: cart.menuitemId,
+      // sizeId: cart.sizeId,
+      // ingredientDetails: cart.ingredientDetails,
+      // quantity: cart.quantity,
+      // unitPrice: cart.unitPrice
     }
   ))
 
-  await OrderDetails.insertMany(orderDetailsData)
+  const orderDetails = await OrderDetail.insertMany(orderDetailsData)
 
 
   // delete user cart
@@ -73,10 +70,7 @@ const createOrder = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({ 
     ...order.toObject(),
-    orderDetails: {
-      orderDetailsData,
-      count: orderDetailsData.length 
-    }
+    orderDetails
   }) 
 }
 
@@ -99,7 +93,7 @@ const createOrder = async (req, res) => {
 const deleteOrder = async (req, res) => {
   const order = req.resource
 
-  await OrderDetails.deleteMany({ order: order._id })
+  await OrderDetail.deleteMany({ order: order._id })
   await order.deleteOne()
 
   res.status(StatusCodes.OK).json({'message': `Order ${order._id} and its details deleted`})

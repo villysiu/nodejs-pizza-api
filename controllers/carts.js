@@ -1,6 +1,7 @@
 const Cart = require('../models/Cart')
 const Menuitem = require('../models/Menuitem')
 const Size = require('../models/Size')
+const Ingredient = require('../models/Ingredient')
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, NotFoundError } = require('../errors')
 
@@ -36,16 +37,22 @@ const getCart = async (req, res) => {
 const createCart = async (req, res) => {
     console.log("creating cart")
     console.log(req.body)
-//     {
-//   menuitemId: '69814634fd04af387993d3fa',
-//   sizeId: '698142fbfd04af387993d3e4',
-//   ingredientIds: [{ingredientId: '432325', qty: 1} ,'{ingredientId: '33545', qty: 1} ,{ingredientId: '348398239', qty: 1} ]
+// creating cart
+// {
+//   menuitemId: '69a07e968ff4d60635ebe7a7',
+//   sizeId: '699fb3e506698c69cddd8dab',
+//   ingredientDetails: [
+//     { ingredientId: '699fb6b05e5b866b91ad778f', qty: 1 },
+//     { ingredientId: '699fb25906698c69cddd8da4', qty: 0 },
+//     { ingredientId: '699fb24006698c69cddd8da1', qty: 1 },
+//     { ingredientId: '69a077758ff4d60635ebe79d', qty: 0 }
+//   ],
 //   quantity: 1
 // }
     const {
         menuitemId,
         sizeId,
-        ingredients,
+        ingredientDetails,
         quantity
     } = req.body
 
@@ -67,23 +74,34 @@ const createCart = async (req, res) => {
     }
 
     unitPrice += size.price
+    
+    for(const {ingredientId, qty} of ingredientDetails ){
 
-    if(ingredientIds.length > 0) {
+        const ingredient = await Ingredient.findById(ingredientId);
+        
+        if(!ingredient)
+            throw new NotFoundError('Ingredient not found');
 
-        ingredientIds.map(async (data) => {
-            const {ingredientId, qty} = data
-            const ingredient = await Ingredient.findById(ingredientId);
-            if(!ingredient)
-                throw new NotFoundError('Ingredient not found');
-            unitPrice += qty * size.perTopping;
-        })
+        unitPrice += qty * size.perTopping;
     }
+    
 
+    // {
+    //     createdBy: 699fadf60405b0677accc775,
+    //     menuitemId: '69a06e258ff4d60635ebe77f',
+    //     sizeId: '699fb3f706698c69cddd8dae',
+    //     ingredientDetails: [
+    //         { ingredientId: '699fb6b05e5b866b91ad778f', qty: 2 },
+    //         { ingredientId: '699fb25906698c69cddd8da4', qty: 2 }
+    //     ],
+    //     quantity: 1,
+    //     unitPrice: 46
+    // }
     const cart = await Cart.create({
         createdBy: req.user._id,
         menuitemId,
         sizeId,
-        ingredientIds,
+        ingredientDetails,
         quantity,
         unitPrice
         
@@ -96,14 +114,14 @@ const updateCart = async (req, res) => {
     console.log(req.body)
     //   cartId: '69992f2140affd8172d3bcb3',  from params
     //  {
-    //   ingredientIds: [{ingredientId: '432325', qty: 1} ,'{ingredientId: '33545', qty: 1} ,{ingredientId: '348398239', qty: 1} ]
+    //   ingredientDetails: [{ingredientId: '432325', qty: 1} ,'{ingredientId: '33545', qty: 1} ,{ingredientId: '348398239', qty: 1} ]
     //   sizeId: '698142fbfd04af387993d3e4',
     //   quantity: 2
     // }
     const cart = req.resource;
     const {
         sizeId,
-        ingredientIds,
+        ingredientDetails,
         quantity
     } = req.body
 
@@ -114,18 +132,19 @@ const updateCart = async (req, res) => {
 
     let unitPrice = size.price
     
-    const tempIngredientIds  = ingredientIds !== undefined ? ingredientIds : cart.ingredientIds
-    for(const {ingredientId, qty} of tempIngredientIds ){
+    const tempIngredientDetails  = ingredientDetails !== undefined ? ingredientDetails : cart.ingredientDetails
+    for(const {ingredientId, qty} of tempIngredientDetails ){
         const ingredient = await Ingredient.findById(ingredientId);
         if(!ingredient)
             throw new NotFoundError('Ingredient not found');
 
         unitPrice += qty * size.perTopping;
     }
-    cart.ingredientIds = tempIngredientIds;
+    cart.ingredientDetails = tempIngredientDetails;
 
-    if (quantity!==undefined)
-        if(isNaN(quantity) || quantity <= 0){
+    if (quantity!==undefined){
+
+        if(isNaN(quantity) || quantity <= 0)
             throw new BadRequestError('Quantity must be a valid number bigger than 0');
         cart.quantity =  quantity
     }

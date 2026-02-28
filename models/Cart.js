@@ -21,7 +21,7 @@ const CartSchema = new mongoose.Schema(
 
     },
 
-    ingredients: [
+    ingredientDetails: [
       {
         ingredientId: {
           type: mongoose.Schema.Types.ObjectId,
@@ -31,7 +31,7 @@ const CartSchema = new mongoose.Schema(
         qty: {
           type: Number,
           default: 1,
-          min: 1
+          min: 0, max: 2
         }
       }
     ],
@@ -39,7 +39,7 @@ const CartSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       default: 1,
-      min: 1,
+      min: 1, max: 6
     },
 
     unitPrice: {
