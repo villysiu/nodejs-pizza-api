@@ -2,7 +2,6 @@ const { StatusCodes } = require('http-status-codes')
 const mongoose = require('mongoose')
 const Ingredient = require('../models/Ingredient')
 const { BadRequestError, NotFoundError } = require('../errors')
-const { checkExistsById } = require('../middleware/validateRequest')
 
 const createIngredient = async (req, res) => {
     // let database validate
