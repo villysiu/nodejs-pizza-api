@@ -23,6 +23,7 @@ const CartSchema = new mongoose.Schema(
 
     ingredientDetails: [
       {
+        _id: false, 
         ingredientId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Ingredient",
@@ -36,10 +37,12 @@ const CartSchema = new mongoose.Schema(
       }
     ],
 
+    ingredientKey: String,
+
     quantity: {
       type: Number,
       default: 1,
-      min: 1, max: 6
+      min: 1, max: 99
     },
 
     unitPrice: {
@@ -51,5 +54,6 @@ const CartSchema = new mongoose.Schema(
   {
     timestamps: true,
 });
+
 
 module.exports = mongoose.model('Cart', CartSchema);

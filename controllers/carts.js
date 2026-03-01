@@ -56,7 +56,7 @@ const createCart = async (req, res) => {
         quantity
     } = req.body
 
-    let unitPrice = 0
+   
 
     if(!menuitemId || !sizeId )
         throw new BadRequestError('menuitemId and sizeId required.')
@@ -72,41 +72,48 @@ const createCart = async (req, res) => {
     if (quantity!==undefined && (isNaN(quantity) || quantity <= 0)) {
         throw new BadRequestError('Quantity must be a valid number bigger than 0');
     }
-
-    unitPrice += size.price
     
     for(const {ingredientId, qty} of ingredientDetails ){
-
-        const ingredient = await Ingredient.findById(ingredientId);
-        
-        if(!ingredient)
+        const exists = await Ingredient.exists({ _id: ingredientId });
+        if(!exists)
             throw new NotFoundError('Ingredient not found');
-
-        unitPrice += qty * size.perTopping;
     }
-    
 
-    // {
-    //     createdBy: 699fadf60405b0677accc775,
-    //     menuitemId: '69a06e258ff4d60635ebe77f',
-    //     sizeId: '699fb3f706698c69cddd8dae',
-    //     ingredientDetails: [
-    //         { ingredientId: '699fb6b05e5b866b91ad778f', qty: 2 },
-    //         { ingredientId: '699fb25906698c69cddd8da4', qty: 2 }
-    //     ],
-    //     quantity: 1,
-    //     unitPrice: 46
-    // }
-    const cart = await Cart.create({
-        createdBy: req.user._id,
+    const sortedIngredients = [...ingredientDetails].sort((a,b)=>a.ingredientId.localeCompare(b.ingredientId))
+
+    console.log(sortedIngredients)
+    const ingredientKey = sortedIngredients
+                            .map((ingr)=>`${ingr.ingredientId}-${ingr.qty}`)
+                            .join('-')
+
+    console.log("add cart", ingredientKey)
+    const repeatedCart = await Cart.findOne({ 
+        createdBy: req.user._id, 
         menuitemId,
         sizeId,
-        ingredientDetails,
-        quantity,
-        unitPrice
-        
+        ingredientKey
     })
-    res.status(StatusCodes.CREATED).json({ cart })
+
+    if(repeatedCart){
+        repeatedCart.quantity += quantity;
+        await repeatedCart.save();
+
+        res.status(StatusCodes.CREATED).json({ repeatedCart })
+    }
+    else{ 
+        const unitPrice = sortedIngredients.reduce((total, ingr) => total + ingr.qty * size.perTopping, size.price)
+        const cart = await Cart.create({
+            createdBy: req.user._id,
+            menuitemId,
+            sizeId,
+            ingredientDetails,
+            ingredientKey,
+            quantity,
+            unitPrice
+            
+        })
+        res.status(StatusCodes.CREATED).json({ cart })
+    }
 }
 
 const updateCart = async (req, res) => {
@@ -130,28 +137,42 @@ const updateCart = async (req, res) => {
         throw new NotFoundError('Size not found')
     cart.sizeId = size._id
 
-    let unitPrice = size.price
-    
-    const tempIngredientDetails  = ingredientDetails !== undefined ? ingredientDetails : cart.ingredientDetails
-    for(const {ingredientId, qty} of tempIngredientDetails ){
-        const ingredient = await Ingredient.findById(ingredientId);
-        if(!ingredient)
-            throw new NotFoundError('Ingredient not found');
+    if(ingredientDetails !== undefined){
+        for(const {ingredientId, qty} of ingredientDetails ){
+            const ingredient = await Ingredient.findById(ingredientId);
+            if(!ingredient)
+                throw new NotFoundError('Ingredient not found');
+        }
+        cart.ingredientDetails = ingredientDetails
+    } 
 
-        unitPrice += qty * size.perTopping;
-    }
-    cart.ingredientDetails = tempIngredientDetails;
+    const sortedIngredients = [...cart.ingredientDetails].sort((a, b)=> a.ingredientId.toString().localeCompare(b.ingredientId).toString());
+    const ingredientKey = sortedIngredients
+                            .map((ingr)=>`${ingr.ingredientId}-${ingr.qty}`)
+                            .join('-')
+    console.log("update cart", ingredientKey)
+    cart.ingredientKey = ingredientKey;
 
-    if (quantity!==undefined){
-
-        if(isNaN(quantity) || quantity <= 0)
+    if(quantity !== undefined){
+        if (isNaN(quantity) || quantity <= 0) 
             throw new BadRequestError('Quantity must be a valid number bigger than 0');
-        cart.quantity =  quantity
+        cart.quantity = quantity
     }
-
     
-    cart.unitPrice = unitPrice
-        
+    const repeatedCart = await Cart.findOne({ 
+        createdBy: req.user._id, 
+        menuitemId: cart.menuitemId,
+        sizeId,
+        ingredientKey
+    })
+
+    if(repeatedCart){
+        cart.quantity += repeatedCart.quantity
+        await repeatedCart.deleteOne();
+    }
+   
+    const unitPrice = cart.ingredientDetails.reduce((total,ingr) => total+ingr.qty * size.perTopping, size.price);
+    cart.unitPrice = unitPrice;
     await cart.save()
 
     res.status(StatusCodes.OK).json({ cart })
