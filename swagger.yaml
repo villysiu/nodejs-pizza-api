@@ -5,7 +5,7 @@ info:
   description: Pizza API
 
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: https://pizza-api-wp8t.onrender.com/
 
 tags:
   - name: Pizza  API
@@ -301,17 +301,6 @@ components:
 
 
     OrderWithDetails:
-      allOf:
-        - $ref: '#/components/schemas/Order'
-        - type: object
-          properties:
-            orderDetails:
-              type: array
-              items:
-                $ref: '#/components/schemas/OrderDetail'
-
-
-    CreateOrderResponse:
       allOf:
         - $ref: '#/components/schemas/Order'
         - type: object
@@ -735,9 +724,8 @@ paths:
 
   /sizes:
     get:
-      tags:
-        - Sizes
       summary: Get all sizes
+      tags: [Sizes]
       responses:
         "200":
           description: List of sizes
@@ -752,9 +740,8 @@ paths:
                       $ref: "#/components/schemas/Size"
 
     post:
-      tags:
-        - Sizes
       summary: Create a new size
+      tags: [Admin - Sizes]
       security:
         - bearerAuth: []
       requestBody:
@@ -790,9 +777,8 @@ paths:
 
   /sizes/{id}:
     get:
-      tags:
-        - Sizes
       summary: Get size by ID
+      tags: [Sizes]
       parameters:
         - name: id
           in: path
@@ -814,9 +800,8 @@ paths:
           description: Size not found
 
     patch:
-      tags:
-        - Sizes
       summary: Update a size
+      tags: [Admin - Sizes]
       security:
         - bearerAuth: []
       parameters:
@@ -854,8 +839,7 @@ paths:
                     $ref: "#/components/schemas/Size"
 
     delete:
-      tags:
-        - Sizes
+      tags: [Admin - Sizes]
       summary: Delete a size
       security:
         - bearerAuth: []
@@ -1027,7 +1011,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateOrderResponse'
+                $ref: '#/components/schemas/OrderWithDetails'
 
 
   /orders/{id}:
