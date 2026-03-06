@@ -12,16 +12,7 @@ const OrderSchema = new mongoose.Schema(
       default: 0.0,
       min: 0,
     },
-    // tax: { 
-    //   type: Number,
-    //   default: 0.0,
-    //   min: 0,
-    // },
-    // gratuity: {
-    //   type: Number,
-    //   default: 0.0,
-    //   min: 0,
-    // }
+
   },
   { timestamps: true }
 )

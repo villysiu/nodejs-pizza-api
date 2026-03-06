@@ -1,260 +1,477 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: Tea API
-  contact: {}
-  version: '1.0'
+  title: Pizza API
+  version: 1.0.0
+  description: Pizza API
+
 servers:
-  - url: https://zero6-jobs-api-lclz.onrender.com/api/v1
   - url: http://localhost:3000/api/v1
-    variables: {}
+
+tags:
+  - name: Pizza  API
+    description: Pizza management endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 65fa12cbb1234567890abcde
+        email:
+          type: string
+          example: john@example.com
+        name:
+          type: string
+          example: John Doe
+        role:
+          type: string
+          example: user
+          
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    UpdateCredentialRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        currPassword:
+          type: string
+        newPassword:
+          type: string
+
+    UpdateRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          example: admin
+    
+    MenuItem:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65fb12cbb1234567890abcde
+        title:
+          type: string
+          example: Margherita Pizza
+        description:
+          type: string
+          example: Classic pizza with tomato and mozzarella
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+        active:
+          type: boolean
+          example: true
+        ingredientIds:
+          type: array
+          items:
+            type: string
+            example: 65fb12cbb1234567890aaaaa
+
+    CreateMenuItemRequest:
+      type: object
+      required:
+        - title
+        - ingredientIds
+        - active
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        ingredientIds:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+
+    UpdateMenuItemRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        ingredientIds:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+
+    Ingredient:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65fc12cbb1234567890abcde
+        title:
+          type: string
+          example: Tomato
+        category:
+          type: string
+          enum: [VEGETABLES, MEATS, OTHERS]
+          example: VEGETABLES
+        price:
+          type: number
+          example: 1.5
+
+    Size:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64e12ab934d5fa2cbbf7b123
+        title:
+          type: string
+          example: Large
+        price:
+          type: number
+          example: 3
+        perTopping:
+          type: number
+          example: 0.5
+
+    Cart:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 69992f2140affd8172d3bcb3
+        createdBy:
+          type: string
+          example: 699123abc123abc123abc123
+        menuitemId:
+          type: string
+          example: 69a07e968ff4d60635ebe7a7
+        sizeId:
+          type: string
+          example: 699fb3e506698c69cddd8dab
+        ingredientDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientDetail'
+        ingredientKey:
+          type: string
+          example: 123-1-456-0
+        quantity:
+          type: number
+          example: 2
+        unitPrice:
+          type: number
+          example: 12.5
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+
+    CreateCartRequest:
+      type: object
+      required:
+        - menuitemId
+        - sizeId
+        - ingredientDetails
+        - quantity
+      properties:
+        menuitemId:
+          type: string
+          example: 69a07e968ff4d60635ebe7a7
+        sizeId:
+          type: string
+          example: 699fb3e506698c69cddd8dab
+        ingredientDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientDetail'
+        quantity:
+          type: number
+          example: 1
+
+
+    UpdateCartRequest:
+      type: object
+      properties:
+        sizeId:
+          type: string
+          example: 699fb3e506698c69cddd8dab
+        ingredientDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientDetail'
+        quantity:
+          type: number
+          example: 2
+
+    IngredientDetail:
+      type: object
+      properties:
+        ingredientId:
+          type: string
+          example: 699fb6b05e5b866b91ad778f
+        qty:
+          type: number
+          minimum: 0
+          maximum: 2
+          example: 1
+
+
+    OrderDetail:
+      type: object
+      properties:
+        orderId:
+          type: string
+        menuitemId:
+          type: string
+          example: 69a07e968ff4d60635ebe7a7
+        sizeId:
+          type: string
+          example: 699fb3e506698c69cddd8dab
+        ingredientDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngredientDetail'
+        quantity:
+          type: number
+          example: 2
+        unitPrice:
+          type: number
+          example: 12.5
+
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 65fc12abc123456789
+        createdBy:
+          type: string
+        total:
+          type: number
+          example: 25.5
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+
+    OrderWithDetails:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            orderDetails:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderDetail'
+
+
+    CreateOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+        - type: object
+          properties:
+            orderDetails:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderDetail'
+                
 paths:
   /auth/register:
     post:
-      tags:
-        - Auth
-      security: []
-      summary: Register a user
-      operationId: RegisterUser
+      summary: Register a new user
+      tags: [Auth]
       requestBody:
-        description: ''
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterUserRequest'
-            example:
-              name: John Doe
-              email: john@gmail.com
-              password: 123456
-        required: true
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
-        '201':
-          description: 'User created'
-          content:
-            application/json:
-              example: 
-                user: 
-                  name: John Doe
-                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        '400':
-          description: Bad request (validation error)        
-      deprecated: false
-
-  /auth/login:
-    post:
-      tags:
-        - Auth
-      security: []
-      summary: Login User
-      operationId: LoginUser
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginUserRequest'
-            example:
-              email: john@gmail.com
-              password: 123456
-        required: true
-      responses:
-        '200':
-          description: Login successful
-          content:
-            application/json:
-              example: 
-                user: 
-                  name: John Doe
-                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        '400':
-          description: Bad request (validation error)      
-      deprecated: false
-      # security: []
-
-  /categories:
-    post:
-      tags:
-        - Categories
-      summary: Create Category
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: CreateCategory
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCategoryRequest'
-            example:
-              title: Green Tea
-              description: Green Tea
-              imageUrl: greentea.jpg
-        required: true
-      responses:
-        '201':
-          description: Category created
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-      deprecated: false
-    get:
-      tags:
-        - Categories
-      summary: Get All Categories
-      operationId: getCategories
-      security: []
-      responses:
-        '200':
-          description: ''
-      
-      deprecated: false  
-  /categories/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
-        description: The category Id
-    get:
-      tags:
-        - Categories
-      summary: Get Single Category
-      operationId: GetCategory
-      security: []
-      responses:
-        '200':
-          description: ''
-        '404':
-          description: Category not found
-      deprecated: false
-
-    patch:
-      tags:
-        - Categories
-      summary: Update Category
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: UpdateCategory
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCategoryRequest'
-            example:
-              title: Green Tea
-              description: Green Tea
-              imageUrl: greentea.jpg
-        required: true
-      responses:
-        '200':
-          description: Category updated
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Category not found
-      deprecated: false
-    delete:
-      tags:
-        - Categories
-      summary: Delete Category
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: DeleteCategory
-      responses:
-        '200':
-          description: Category deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Category not found
-      deprecated: false
-  /menuitems:
-    post:
-      tags:
-        - Menuitems
-      summary: Create Menuitem
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: CreateMenuitem
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateMenuitemRequest'
-            example:
-              title: Chamomile
-              imageUrl: Chamomile.jpg
-              price: 5
-              milkId: "69813e1ab60cff3582533eda"
-              categoryId: "69812f9904c60c2db78d7a52"
-              temperature: "HOT"
-              sugar: "50%"
-        required: true
-      responses:
-        '201':
-          description: Menuitem created
+        201:
+          description: User registered successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  menuitem:
-                    $ref: '#/components/schemas/Menuitem'
-              example:
-                menuitem:
-                  _id: "698146dbfd04af387993d3ff"
-                  title: Chamomile
-                  imageUrl: Chamomile.jpg
-                  price: 5
-                  active: true
-                  temperature: "HOT"
-                  sugar: "0%"
-                  milk: "69813e1ab60cff3582533eda"
-                  category: "69812f9904c60c2db78d7a52"
-                  createdAt: "2026-02-03T00:52:43.505Z"
-                  updatedAt: "2026-02-03T00:52:43.505Z"
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
 
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-      deprecated: false
-    get:
-      tags:
-        - Menuitems
-      summary: Get All Menuitems
-      operationId: getMenuitems
-      security: []
+  /auth/login:
+    post:
+      summary: Login user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
       responses:
-        '200':
-          description: Menuitems retrieved successfully
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        401:
+          description: Invalid credentials
+
+  /auth:
+    get:
+      summary: Get all users (Admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+    patch:
+      summary: Update current user's credentials
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCredentialRequest'
+      responses:
+        200:
+          description: Updated user
+
+    delete:
+      summary: Delete current user
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User deleted
+
+  /auth/me:
+    get:
+      summary: Get current logged-in user
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/{id}:
+    delete:
+      summary: Delete user by ID (Admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User deleted by admin
+
+    patch:
+      summary: Update user role (Admin only)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        200:
+          description: Role updated successfully
+  /api/v1/menuitems:
+    get:
+      summary: Get all menu items
+      tags: [MenuItems]
+      responses:
+        200:
+          description: List of menu items
           content:
             application/json:
               schema:
@@ -263,608 +480,595 @@ paths:
                   menuitems:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Menuitem'
+                      $ref: '#/components/schemas/MenuItem'
                   count:
                     type: integer
-              example:
-                menuitems:
-                  - _id: "698142befd04af387993d3e0"
-                    title: Chai
-                    imageUrl: chai.jpg
-                    price: 5
-                    active: true
-                    temperature: "HOT"
-                    sugar: "0%"
-                    milk: null
-                    category:
-                      title: Black Tea
-                    createdAt: "2026-02-03T00:35:10.187Z"
-                    updatedAt: "2026-02-03T00:35:10.187Z"
-                count: 8
-      deprecated: false  
-  /menuitems/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
-        description:  menuitemId
-    get:
-      tags:
-        - Menuitems
-      summary: Get Single Menuitem
-      operationId: GetMenuitem
-      security: []
-      responses:
-        '200':
-          description: Menuitem retrieved
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menuitem:
-                    $ref: '#/components/schemas/Menuitem'
-              example:
-                menuitem:
-                  _id: "698146dbfd04af387993d3ff"
-                  title: Chamomile
-                  imageUrl: Chamomile.jpg
-                  price: 5
-                  active: true
-                  temperature: "HOT"
-                  sugar: "0%"
-                  milk: null
-                  category: 
-                    title: Caffaine Free
-                  createdAt: "2026-02-03T00:52:43.505Z"
-                  updatedAt: "2026-02-03T00:52:43.505Z"
-        '404':
-          description: Menuitem not found
-      deprecated: false
 
-    patch:
-      tags:
-        - Menuitems
-      summary: Update Menuitem
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: UpdateMenuitem
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateMenuitemRequest'
-            example:
-              title: Chamomile
-              imageUrl: Chamomile.jpg
-              price: 5
-              milkId: "69813e1ab60cff3582533eda"
-              categoryId: "69812f9904c60c2db78d7a52"
-              temperature: "HOT"
-              sugar: "50%"
-        required: true
-      responses:
-        '200':
-          description: Menuitem updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  menuitem:
-                    $ref: '#/components/schemas/Menuitem'
-              example:
-                menuitem:
-                  _id: "698146dbfd04af387993d3ff"
-                  title: Chamomile
-                  imageUrl: Chamomile.jpg
-                  price: 5
-                  active: true
-                  temperature: ICED
-                  sugar: "25%"
-                  milk: null
-                  category: "69812f9904c60c2db78d7a52"
-                  createdAt: "2026-02-03T00:52:43.505Z"
-                  updatedAt: "2026-02-03T00:52:43.505Z"
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Menuitem not found
-      deprecated: false
-    delete:
-      tags:
-        - Menuitems
-      summary: Delete Menuitem
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: DeleteMenuitem
-      responses:
-        '200':
-          description: Menuitem deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Menuitem not found
-      deprecated: false
-      
-  /milks:
     post:
-      tags:
-        - Milks
-      summary: Create Milk
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: CreateMilk
+      summary: Create a new menu item (Admin only)
+      tags: [Admin - MenuItems]
+      security:
+        - bearerAuth: []
       requestBody:
-        description: ''
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMilkRequest'
-            example:
-              title: Almond Milk
-              price: 2.0
-        required: true
+              $ref: '#/components/schemas/CreateMenuItemRequest'
       responses:
-        '201':
-          description: Milk created
-        '401':
+        201:
+          description: Menu item created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  menuitem:
+                    $ref: '#/components/schemas/MenuItem'
+        400:
+          description: Validation error
+        401:
           description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-      deprecated: false
+        403:
+          description: Forbidden (Admin only)
+
+  /api/v1/menuitems/{id}:
     get:
-      tags:
-        - Milks
-      summary: Get All Milks
-      operationId: getMilks
-      security: []
+      summary: Get a single menu item by ID
+      tags: [MenuItems]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
-          description: ''
-      
-      deprecated: false  
-  /milks/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
-        description: The milk Id
-    get:
-      tags:
-        - Milks
-      summary: Get Single Milk
-      operationId: GetMilk
-      security: []
-      responses:
-        '200':
-          description: ''
-        '404':
-          description: Milk not found
-      deprecated: false
+        200:
+          description: Menu item found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  menuitem:
+                    $ref: '#/components/schemas/MenuItem'
+        404:
+          description: Menu item not found
 
     patch:
-      tags:
-        - Milks
-      summary: Update Milk
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: UpdateMilk
+      summary: Update a menu item (Admin only)
+      tags: [Admin - MenuItems]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: ''
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMilkRequest'
-            example:
-              title: Almond Milk
-              price: 2.0
-        required: true
+              $ref: '#/components/schemas/UpdateMenuItemRequest'
       responses:
-        '200':
-          description: Milk updated
-        '401':
+        200:
+          description: Menu item updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  menuitem:
+                    $ref: '#/components/schemas/MenuItem'
+        400:
+          description: Validation error
+        401:
           description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Milk not found
-      deprecated: false
-    delete:
-      tags:
-        - Milks
-      summary: Delete Milk
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
+        403:
+          description: Forbidden
+        404:
+          description: Menu item not found
 
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: DeleteMilk
+    delete:
+      summary: Delete a menu item (Admin only)
+      tags: [Admin - MenuItems]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
-          description: Milk deleted successfully
-        '401':
+        200:
+          description: Menu item deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Menu item deleted
+        401:
           description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Milk not found
-      deprecated: false
+        403:
+          description: Forbidden
+        404:
+          description: Menu item not found
+
+  /api/v1/ingredients:
+    get:
+      summary: Get all ingredients
+      tags: [Ingredients]
+      responses:
+        200:
+          description: List of ingredients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingredients:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ingredient'
+                  count:
+                    type: integer
+
+    post:
+      summary: Create ingredient (Admin only)
+      tags: [Admin - Ingredients]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+      responses:
+        201:
+          description: Ingredient created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingredient:
+                    $ref: '#/components/schemas/Ingredient'
+        400:
+          description: Validation error
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+
+  /api/v1/ingredients/{id}:
+    get:
+      summary: Get ingredient by ID
+      tags: [Ingredients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ingredient found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingredient:
+                    $ref: '#/components/schemas/Ingredient'
+        404:
+          description: Ingredient not found
+
+    patch:
+      summary: Update ingredient (Admin only)
+      tags: [Admin - Ingredients]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+      responses:
+        200:
+          description: Ingredient updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ingredient:
+                    $ref: '#/components/schemas/Ingredient'
+        400:
+          description: Validation error
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        404:
+          description: Ingredient not found
+
+    delete:
+      summary: Delete ingredient (Admin only)
+      tags: [Admin - Ingredients]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ingredient deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: ingredient item deleted
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        404:
+          description: Ingredient not found
+
   /sizes:
+    get:
+      tags:
+        - Sizes
+      summary: Get all sizes
+      responses:
+        "200":
+          description: List of sizes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sizes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Size"
+
     post:
       tags:
         - Sizes
-      summary: Create Size
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: CreateSize
+      summary: Create a new size
+      security:
+        - bearerAuth: []
       requestBody:
-        description: ''
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSizeRequest'
-            example:
-              title: Almond Size
-              price: 2.0
-        required: true
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  example: Large
+                price:
+                  type: number
+                  example: 3.5
+                perTopping:
+                  type: number
+                  example: 0.5
       responses:
-        '201':
+        "201":
           description: Size created
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-      deprecated: false
-    get:
-      tags:
-        - Sizes
-      summary: Get All Sizes
-      operationId: getSizes
-      security: []
-      responses:
-        '200':
-          description: ''
-      
-      deprecated: false  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  size:
+                    $ref: "#/components/schemas/Size"
+        "400":
+          description: Bad request
+
   /sizes/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
-        description: The size Id
     get:
       tags:
         - Sizes
-      summary: Get Single Size
-      operationId: GetSize
-      security: []
+      summary: Get size by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Size ID
+          schema:
+            type: string
       responses:
-        '200':
-          description: ''
-        '404':
+        "200":
+          description: Size found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  size:
+                    $ref: "#/components/schemas/Size"
+        "404":
           description: Size not found
-      deprecated: false
 
     patch:
       tags:
         - Sizes
-      summary: Update Size
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: UpdateSize
+      summary: Update a size
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Size ID
+          schema:
+            type: string
       requestBody:
-        description: ''
+        required: false
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateSizeRequest'
-            example:
-              title: Almond Size
-              price: 2.0
-        required: true
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Medium
+                price:
+                  type: number
+                  example: 2.5
+                perTopping:
+                  type: number
+                  example: 0.4
       responses:
-        '200':
+        "200":
           description: Size updated
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Size not found
-      deprecated: false
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  size:
+                    $ref: "#/components/schemas/Size"
+
     delete:
       tags:
         - Sizes
-      summary: Delete Size
-      description: |
-        Requires authentication.
-        Admin (superadmin) role only.
-
-        Test credentials:
-        email: admin@gg.com
-        password: 123456
-      operationId: DeleteSize
+      summary: Delete a size
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Size ID
+          schema:
+            type: string
       responses:
-        '200':
-          description: Size deleted successfully
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden (not admin)
-        '404':
-          description: Size not found
-      deprecated: false
+        "200":
+          description: Size deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Size deleted successfully
   
-security:
-  - httpBearer: []
-components:
-  schemas:
-    RegisterUserRequest:
-      title: RegisterUserRequest
-      required:
-        - name
-        - email
-        - password
-      type: object
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-      example:
-        name: bob
-        email: bob@gmail.com
-        password: secret
-    LoginUserRequest:
-      title: LoginUserRequest
-      required:
-        - email
-        - password
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-      example:
-        email: susan@gmail.com
-        password: secret
-    CreateCategoryRequest:
-      title: CreateCategoryRequest
-      required:
-        - title
-      type: object
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        imageUrl:
-          type: string
-      example:
-        title: Black Tea
-        description: Strong black tea
-        imageUrl: blacktea.jpg      
-    UpdateCategoryRequest:
-      title: UpdateCategoryRequest
-      required:
-        - title
-      type: object
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        imageUrl:
-          type: string
-      example:
-        title: Black Tea
-        description: Black tea 
-        imageUrl: blacktea.jpg
-    CreateMenuitemRequest:
-      type: object
-      description: Create a menuitem. NA stands for no choice
-      properties:
-        title:
-          type: string
-        imageUrl:
-          type: string
-        price:
-          type: number
-          format: float
-        categoryId:
-          type: string
-        milkId:
-          nullable: true
-          type: string
-        temperature:
-          type: string
-          enum: [NA, HOT, ICED]
-        sugar:
-          type: string
-          enum: ['NA', '0%', '25%', '50%', '75%', '100%']
-      example: 
-        title: Chamomile
-        imageUrl: Chamomile.jpg
-        price: 5
-        categoryId: "69812f9904c60c2db78d7a52"
-        milkId: "69813e1ab60cff3582533eda"
-        temperature: "HOT"
-        sugar: "50%"
-    UpdateMenuitemRequest:
-      type: object
-      description: Updating a menuitem. NA stands for no choice
-      properties:
-        title:
-          type: string
-        imageUrl:
-          type: string
-        price:
-          type: number
-          format: float
-        categoryId:
-          type: string
-        milkId:
-          nullable: true
-          type: string
-        temperature:
-          type: string
-          enum: [NA, HOT, ICED]
-        sugar:
-          type: string
-          enum: ['NA', '0%', '25%', '50%', '75%', '100%']
-      example: 
-        title: Chamomile
-        imageUrl: Chamomile.jpg
-        price: 5
-        categoryId: "69812f9904c60c2db78d7a52"
-        milkId: "69813e1ab60cff3582533eda"
-        temperature: "HOT"
-        sugar: "50%"
+  /carts:
+    get:
+      summary: Get all carts for authenticated user
+      tags: [Carts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of carts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cart'
+                  subtotal:
+                    type: number
+                    example: 25.5
 
-    Menuitem:
-      type: object
-      required:
-        - _id
-        - title
-        - category
-        - active
-        - price
-        - temperature
-        - sugar
-        - createdAt
-        - updatedAt
-      properties:
-        _id:
-          type: string
-          description: MongoDB ObjectId
-          example: "698146dbfd04af387993d3ff"
+    post:
+      summary: Create a cart item
+      tags: [Carts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCartRequest'
+      responses:
+        "201":
+          description: Cart created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
 
-        title:
-          type: string
-          description: Menuitem title
-          example: Chamomile
+  /carts/{id}:
 
-        active:
-          type: boolean
-          description: Whether the menuitem is active
-          default: true
-          example: true
+    get:
+      summary: Get a single cart
+      tags: [Carts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cart retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
 
-        imageUrl:
-          type: string
-          description: Image URL or filename
-          example: Chamomile.jpg
+    patch:
+      summary: Update a cart
+      tags: [Carts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartRequest'
+      responses:
+        "200":
+          description: Cart updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
 
-        price:
-          type: number
-          format: float
-          description: Menuitem price
-          default: 0
-          example: 5
+    delete:
+      summary: Delete a cart
+      tags: [Carts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cart deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: cart is deleted successfully
+  
+  /orders:
+    get:
+      summary: Get all orders of authenticated user
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
 
-        category:
-          type: string
-          description: Category ID (ObjectId reference)
-          example: "69812f9904c60c2db78d7a52"
-
-        milk:
-          nullable: true
-          description: Milk option (ObjectId reference or null)
-          oneOf:
-            - type: string
-              example: "69813e1ab60cff3582533eda"
-            - type: 'null'
-
-        temperature:
-          type: string
-          description: Drink temperature
-          enum: [NA, HOT, ICED]
-          default: NA
-          example: HOT
-
-        sugar:
-          type: string
-          description: Sugar level
-          enum: ['NA', '0%', '25%', '50%', '75%', '100%']
-          default: NA
-          example: "50%"
-
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-          example: "2026-02-03T00:52:43.505Z"
-
-        updatedAt:
-          type: string
-          format: date-time
-          description: Last update timestamp
-          example: "2026-02-03T00:52:43.505Z"
-
-  securitySchemes:
-    httpBearer:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    post:
+      summary: Create order from user's cart
+      description: Converts all user carts into an order and clears the cart
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResponse'
 
 
-tags:
-  - name: Auth
-    description: ''
-  - name: Categories
-    description: ''
-  - name: Menuitems
-    description: ''
-  - name: Milks
-    description: ''
-  - name: Sizes
-    description: ''
-  - name: Carts
-    description: ''
+  /orders/{id}:
+    get:
+      summary: Get order with order details
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderWithDetails'
+
+    delete:
+      summary: Delete an order
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Order 65fc12abc deleted

@@ -6,6 +6,8 @@ const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, NotFoundError } = require('../errors')
 
 const getCarts = async (req, res) => {
+    console.log('all carts')
+    console.log(req.user)
     const carts = await Cart.find({ createdBy: req.user._id })
     // .populate({
     //     path: 'menuitemId',

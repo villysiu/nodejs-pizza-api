@@ -15,11 +15,15 @@ const auth = async (req, res, next) => {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET)
 
-
+    console.log('payload', payload)
+    console.log(typeof payload)
 // attach the user to the header
-    req.user = await User.findById(payload.userId)
-  
-    
+    const user = await User.findById(payload.userId)
+    if(!user){
+      throw new NotFoundError(`No user with id ${payload.userId}`)
+  }
+    req.user = user
+    console.log('req.user', req.user)
     next()
 
   } catch (error) {

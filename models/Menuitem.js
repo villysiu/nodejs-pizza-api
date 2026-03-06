@@ -7,12 +7,14 @@ const MenuitemSchema = new mongoose.Schema(
       required: [true, 'Title is required'],
       trim: true,
     },
-
     active: {
       type: Boolean,
       default: true,
     },
-
+    description: {
+      type: String,
+      default: ''
+    },
     imageUrl: {
       type: String,
       trim: true,

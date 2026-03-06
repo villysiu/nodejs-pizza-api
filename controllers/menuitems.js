@@ -9,6 +9,7 @@ const createMenuitem = async (req, res) => {
   
   const {
     title,
+    description,
     imageUrl,
     ingredientIds,
     active
@@ -18,7 +19,7 @@ const createMenuitem = async (req, res) => {
     throw new BadRequestError('Title cannot be empty')
 
   for(const ingredientId of ingredientIds){
-      const exists = await Ingredient.exists({ _id: id });
+      const exists = await Ingredient.exists({ _id: ingredientId  });
       if (!exists) 
           throw new NotFoundError(`No ingredient with id ${id}`);
   }
@@ -30,6 +31,7 @@ const createMenuitem = async (req, res) => {
   const menuitem = await Menuitem.create({
     title: title.trim(),
     imageUrl: imageUrl.trim(),
+    description,
     active,
     ingredientIds
   })
@@ -44,6 +46,7 @@ const updateMenuitem = async (req, res) => {
   const {
     title,
     imageUrl,
+    description,
     ingredientIds,
     active
   } = req.body
@@ -58,7 +61,7 @@ const updateMenuitem = async (req, res) => {
   if(ingredientIds !== undefined && ingredientIds.length > 0) {
 
     for(const ingredientId of ingredientIds){
-      const exists = await Ingredient.exists({ _id: id });
+      const exists = await Ingredient.exists({ _id: ingredientId });
         if (!exists) 
             throw new NotFoundError(`No ingredient with id ${id}`);
     }
@@ -68,6 +71,9 @@ const updateMenuitem = async (req, res) => {
   
   if(imageUrl !== undefined) 
     menuitem.imageUrl = imageUrl.trim()
+  
+  if(description !== undefined)
+    menuitem.description = description;
   
   if (active !== undefined) {
     if(typeof active !== 'boolean')
