@@ -1,15 +1,28 @@
 # Pizza App
 Full-Stack  Application with Role-Based Access Control
 
-A pizza ordering platform where users can fully customize pizzas (size, ingredients, quantities) and securely place orders.
+A pizza ordering platform where users can customize pizzas (size, ingredients, quantities) and securely place orders.
 
 The application implements JWT authentication, role-based authorization, and a clean separation between frontend and backend services.
 
-## API Documentation
+Users can customize pizzas (size, ingredients, quantities), manage carts, and securely place orders.
 
-`http://localhost:3000/api-docs`
+Admins can manage menu items, ingredients, sizes, and users.
+## Live Demo 
 
-`render.com`
+`https://pizza-api-wp8t.onrender.com`
+
+API Documentation:
+
+`https://pizza-api-wp8t.onrender.com/api-docs`
+
+API: 
+
+`https://github.com/villysiu/pizza-ordering-app.git`
+
+Frontend: 
+
+`https://github.com/villysiu/pizza-react`
 
 ## Architecture Overview
 
@@ -51,6 +64,7 @@ Database – Persistent storage
 - Middleware validates 
   - JWT token
   - User role permissions
+  - Protected routes
 - Error handling
 
 ### Roles
@@ -70,7 +84,7 @@ Database – Persistent storage
 - Create, update & delete ingredient 
 - View all users
 - Update user's role
-- Delete user
+- Delete user and all related order, order details and carts.
 
 
 ### Project Structure
@@ -82,50 +96,11 @@ nodejs-pizza-api/  # Express API
 ├── middleware/
 ├── models/
 ├── routes/
-├── seed.js  # optional
+
 └── app.js
 └── README.md
 └── swagger.yaml
 ```
 
-### Local Development Setup
-1️⃣ Clone Repository
 
-```
-git clone https://github.com/your-username/pizza-ordering-app.git
-
-cd pizza-ordering-app 
-```
-🗄 Backend Setup
-Install Dependencies
-```
-cd server
-npm install
-```
-Create Environment File
-
-Inside /server, create a .env file:
-
-
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secure_secret
-
-⚠️ .env is not committed to version control.
-
-Seed Database
-
-The project includes a seeding script to preload pizza data.
-
-npm run seed
-
-This will:
-
-Clear existing pizza data
-
-Insert sample menu items
-
-Start Backend
-npm start
-
-Backend runs on:
 
