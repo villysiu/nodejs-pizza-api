@@ -10,6 +10,12 @@ Users can customize pizzas (size, ingredients, quantities), manage carts, and se
 Admins can manage menu items, ingredients, sizes, and users.
 ## Live Demo 
 
+Frontend (User Interface):
+
+`https://villysiu.github.io/pizza-react/`
+
+API Server:
+
 `https://pizza-api-wp8t.onrender.com`
 
 API Documentation:
