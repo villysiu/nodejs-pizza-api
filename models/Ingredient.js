@@ -13,11 +13,11 @@ const IngredientSchema = new mongoose.Schema(
       enum: ['VEGETABLES', 'MEATS', 'OTHERS'],
       default: 'OTHERS'
     },
-    price: {
-      type: Number,
-      default: 0.0,
-      min: [0, 'Price cannot be negative']
-    },
+    // price: {
+    //   type: Number,
+    //   default: 0.0,
+    //   min: [0, 'Price cannot be negative']
+    // },
 
   },
   {

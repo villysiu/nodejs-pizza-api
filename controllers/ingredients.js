@@ -5,7 +5,7 @@ const { BadRequestError, NotFoundError } = require('../errors')
 
 const createIngredient = async (req, res) => {
     // let database validate
-    const { title, category, price } = req.body;
+    const { title, category } = req.body;
 
     if (!title || title.trim() === '') {
         throw new BadRequestError('Title cannot be empty')
@@ -15,10 +15,10 @@ const createIngredient = async (req, res) => {
         throw new BadRequestError( 'Invalid category' );
     
 
-    if (price === undefined || typeof price !== 'number' || price < 0)
-        throw new BadRequestError( 'Price must be a non-negative number' );
+    // if (price === undefined || typeof price !== 'number' || price < 0)
+    //     throw new BadRequestError( 'Price must be a non-negative number' );
         
-    const ingredient = await Ingredient.create({ title, category, price });
+    const ingredient = await Ingredient.create({ title, category });
 
     res.status(StatusCodes.CREATED).json( {ingredient} )
 }
@@ -27,7 +27,7 @@ const createIngredient = async (req, res) => {
 const updateIngredient = async (req, res) => {
     const ingredient = req.resource
 
-    const { title, category, price } = req.body;
+    const { title, category } = req.body;
 
     if(title !== undefined){
         if (title.trim() === '') {
@@ -42,11 +42,11 @@ const updateIngredient = async (req, res) => {
     
         ingredient.category = category
     }
-    if(price !== undefined){
-        if (typeof price !== 'number' || price < 0) 
-            throw new BadRequestError( 'Price must be a non-negative number' );
-        ingredient.price = price
-    }
+    // if(price !== undefined){
+    //     if (typeof price !== 'number' || price < 0) 
+    //         throw new BadRequestError( 'Price must be a non-negative number' );
+    //     ingredient.price = price
+    // }
     await ingredient.save()
 
     res.status(StatusCodes.OK).json( {ingredient} )
@@ -56,7 +56,7 @@ const updateIngredient = async (req, res) => {
 const getIngredients = async (req, res) => {
   
   const ingredients = await Ingredient.find()
-    .select('title price category _id');
+    .select('title category _id');
     
   res.status(StatusCodes.OK).json({ingredients, 'count': ingredients.length});
 };
