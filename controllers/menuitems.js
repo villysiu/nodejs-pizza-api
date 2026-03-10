@@ -89,12 +89,22 @@ const updateMenuitem = async (req, res) => {
 
 const getMenuitems = async (req, res) => {
   
-  const menuitems = await Menuitem.find()
+  // const menuitems = await Menuitem.find()
   //  .populate({
   //       path: 'ingredientIds',
   //       select: '_id title  price'
   //   })
+  let query = {};
 
+  if(req.query.q){
+
+    // remove escape characters
+    const searchWord = req.query.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    query.title = { $regex: searchWord, $options: "i" };
+  }
+
+  const menuitems = await Menuitem.find(query);
   res.status(StatusCodes.OK).json({menuitems, 'count': menuitems.length});
 };
 

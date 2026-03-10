@@ -17,7 +17,9 @@ const {getResourceById} = require('../middleware/validateRequest')
 
 //public 
 router.get("/", getMenuitems);
+router.get('/search', getMenuitems); // GET /menuitems/search?q=spin
 router.get("/:id", getResourceById(Menuitem), getMenuitem);
+
 
 // admin
 router.post("/", authenticateUser, isAdmin, createMenuitem);
