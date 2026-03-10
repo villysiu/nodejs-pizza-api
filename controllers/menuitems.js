@@ -98,10 +98,20 @@ const getMenuitems = async (req, res) => {
 
   if(req.query.q){
 
-    // remove escape characters
     const searchWord = req.query.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    query.title = { $regex: searchWord, $options: "i" };
+    const ingredients = await Ingredient.find({
+      title: { $regex: searchWord, $options: "i" }
+    }).select("_id");
+
+    const ingredientIds = ingredients.map(i => i._id);
+
+    query = {
+      $or: [
+        { title: { $regex: searchWord, $options: "i" } },
+        { ingredientIds: { $in: ingredientIds } }
+      ]
+    };
   }
 
   const menuitems = await Menuitem.find(query);
