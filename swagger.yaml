@@ -5,7 +5,7 @@ info:
   description: Pizza API
 
 servers:
-  - url: https://pizza-api-wp8t.onrender.com/
+  - url: https://pizza-api-wp8t.onrender.com/api/v1/
 
 tags:
   - name: Pizza  API
